@@ -112,5 +112,5 @@ face_project/
 ---
 
 <div align="center">
-  <p>Dibuat dengan ❤️ untuk Kelas Aljabar Linier</p>
+  <p>Dibuat dengan ❤️ untuk Proyek Akhir Aljabar Linier</p>
 </div>
