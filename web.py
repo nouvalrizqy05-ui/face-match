@@ -152,5 +152,6 @@ def compare():
 
 
 if __name__ == "__main__":
-    print("[FaceMatch] Starting server on http://127.0.0.1:5000 ...")
-    app.run(debug=False, port=5000, threaded=False)
+    port = int(os.environ.get("PORT", 8000))
+    print(f"[FaceMatch] Starting server on http://0.0.0.0:{port} ...")
+    app.run(debug=False, host="0.0.0.0", port=port, threaded=False)
