@@ -20,7 +20,7 @@
 
 **FaceMatch** adalah sistem cerdas yang dirancang untuk memverifikasi kecocokan identitas seseorang antara **foto masa kecil** dan **foto masa kini**. Sistem ini menggunakan arsitektur hybrid yang menggabungkan ekstraksi fitur non-linear dari model *ArcFace* dengan proyeksi matriks linier melalui dekomposisi *SVD/PCA*.
 
-> **Tugas Proyek Mata Kuliah Aljabar Linier | UNNES 2025**  
+> **Tugas Proyek Mata Kuliah Aljabar Linier | UNNES 2026**  
 > **Kelompok:** Nouval · Tirta · Farritz
 
 ---
