@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaceMatch — Hybrid Verification</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    boxShadow: { 'soft': '0 8px 24px -8px rgba(0,0,0,0.06)' }
+                }
+            }
+        }
+    </script>
+    <style>
+        .hide { display: none !important; }
+        .glass { background: rgba(255,255,255,0.2); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.25); }
+    </style>
+</head>
+<body class="bg-[#f5f5f4] dark:bg-slate-950 text-slate-700 dark:text-slate-300 antialiased flex flex-col min-h-screen text-sm transition-colors duration-300">
+
+    <!-- Nav -->
+    <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shadow-sm">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight transition-colors leading-tight">FaceMatch<span class="text-emerald-500">.</span></span>
+                    <span class="text-[9.5px] font-semibold text-slate-400 dark:text-slate-500 hidden sm:block">Sistem Perbandingan Wajah masa kecil dan saat ini</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" class="p-1.5 text-slate-400 hover:text-emerald-500 dark:hover:text-emerald-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <svg id="theme-icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
+                </button>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest hidden sm:block">Hybrid Verification</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="max-w-3xl mx-auto px-4 py-8 w-full flex-grow">
+
+        <div class="text-center mb-6">
+            <h1 class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100 mb-2 tracking-tight">Perbandingan Wajah</h1>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Unggah foto masa kecil & foto sekarang untuk dibandingkan secara otomatis</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div id="upload-card" class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-soft border border-slate-100 dark:border-slate-700 mb-5 transition-colors duration-300">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Foto A -->
+                <div id="drop-a" class="relative group cursor-pointer bg-slate-50 dark:bg-slate-900/50 hover:bg-emerald-50/40 dark:hover:bg-emerald-900/20 border border-transparent hover:border-emerald-200 dark:hover:border-emerald-800 transition-all rounded-xl flex flex-col items-center justify-center min-h-[150px] overflow-hidden">
+                    <div id="icon-a" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-emerald-500 mb-2 group-hover:scale-105 transition-transform border dark:border-slate-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                    <p id="txt-a" class="text-xs font-bold text-slate-500 dark:text-slate-400">Foto Masa Kecil</p>
+                    <p id="sub-a" class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Klik untuk unggah</p>
+                    <img id="prev-a" src="" class="absolute inset-0 w-full h-full object-contain p-1.5 bg-white dark:bg-slate-900 hide" alt="">
+                    <div id="ov-a" class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hide rounded-xl">
+                        <span class="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Ganti</span>
+                    </div>
+                    <input type="file" id="in-a" class="hidden" accept="image/*">
+                </div>
+                <!-- Foto B -->
+                <div id="drop-b" class="relative group cursor-pointer bg-slate-50 dark:bg-slate-900/50 hover:bg-indigo-50/40 dark:hover:bg-indigo-900/20 border border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 transition-all rounded-xl flex flex-col items-center justify-center min-h-[150px] overflow-hidden">
+                    <div id="icon-b" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-indigo-500 mb-2 group-hover:scale-105 transition-transform border dark:border-slate-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <p id="txt-b" class="text-xs font-bold text-slate-500 dark:text-slate-400">Foto Sekarang</p>
+                    <p id="sub-b" class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Klik untuk unggah</p>
+                    <img id="prev-b" src="" class="absolute inset-0 w-full h-full object-contain p-1.5 bg-white dark:bg-slate-900 hide" alt="">
+                    <div id="ov-b" class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hide rounded-xl">
+                        <span class="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full">Ganti</span>
+                    </div>
+                    <input type="file" id="in-b" class="hidden" accept="image/*">
+                </div>
+            </div>
+            <div id="err-box" class="hide bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-xs font-bold p-3 rounded-lg mb-3 text-center border border-rose-100 dark:border-rose-800"></div>
+            <button id="go-btn" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed" disabled>
+                <span id="go-txt">Mulai Analisis</span>
+                <svg id="go-spin" class="animate-spin hide w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            </button>
+        </div>
+
+        <!-- Results (initially hidden) -->
+        <div id="results" class="hide space-y-5 pb-8">
+
+            <!-- Banner -->
+            <div id="banner" class="rounded-2xl px-6 py-5 text-center text-white transition-all">
+                <div id="b-icon" class="w-10 h-10 rounded-xl bg-white/20 mx-auto flex items-center justify-center mb-3"></div>
+                <h2 id="b-title" class="text-xl font-extrabold mb-1"></h2>
+                <p id="b-desc" class="text-white/80 text-xs"></p>
+                <div class="mt-4 flex flex-wrap justify-center gap-2">
+                    <span class="glass px-3 py-1.5 rounded-lg text-xs font-bold">Skor: <span id="m-sim"></span></span>
+                    <span class="glass px-3 py-1.5 rounded-lg text-xs font-bold">Dist: <span id="m-dist"></span></span>
+                    <span class="glass px-3 py-1.5 rounded-lg text-xs font-bold"><span id="m-conf"></span></span>
+                </div>
+            </div>
+
+            <!-- Crop Result -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-soft border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Deteksi & Penyelarasan Wajah</h3>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded">Klik gambar untuk perbesar</span>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-center">
+                    <img id="plot-crops" src="" class="max-h-36 object-contain cursor-zoom-in hover:opacity-80 transition-opacity" onclick="openModal(this.src)">
+                </div>
+            </div>
+
+            <!-- Eigenface Overlay -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-soft border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Eigenface Analysis</h3>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500 font-medium bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded hidden sm:inline-block">Klik gambar untuk perbesar</span>
+                </div>
+                <p class="text-[11px] text-slate-400 dark:text-slate-500 mb-3">Visualisasi grayscale overlay dan peta perbedaan piksel untuk mencocokkan struktur geometri wajah.</p>
+                <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-center">
+                    <img id="plot-eigen" src="" class="max-h-40 object-contain cursor-zoom-in hover:opacity-80 transition-opacity" onclick="openModal(this.src)">
+                </div>
+            </div>
+
+            <!-- Toggle PCA Details -->
+            <div class="text-center">
+                <button id="pca-toggle" class="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-xs font-bold rounded-lg transition-colors border border-transparent dark:border-indigo-800/50">
+                    <svg id="pca-chevron" class="w-4 h-4 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                    Lihat Detail Visualisasi PCA
+                </button>
+            </div>
+
+            <!-- PCA Details (hidden) -->
+            <div id="pca-panel" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-soft border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700 mb-2 h-28 flex items-center justify-center">
+                        <img id="plot-pca2d" src="" class="max-h-full object-contain cursor-zoom-in hover:opacity-80 transition-opacity" onclick="openModal(this.src)">
+                    </div>
+                    <h4 class="text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-0.5">Proyeksi PCA 2D</h4>
+                    <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded w-fit mb-1 border border-slate-100 dark:border-slate-700">(PC1, PC2)</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Kedekatan posisi titik = kemiripan identitas.</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-soft border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700 mb-2 h-28 flex items-center justify-center">
+                        <img id="plot-hybrid" src="" class="max-h-full object-contain cursor-zoom-in hover:opacity-80 transition-opacity" onclick="openModal(this.src)">
+                    </div>
+                    <h4 class="text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-0.5">Hybrid Score</h4>
+                    <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded w-fit mb-1 border border-slate-100 dark:border-slate-700">0.7·Cos_A + 0.3·Cos_P</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Dekomposisi skor ArcFace dan PCA.</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-soft border border-slate-100 dark:border-slate-700 transition-colors duration-300">
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700 mb-2 h-28 flex items-center justify-center">
+                        <img id="plot-pca-var" src="" class="max-h-full object-contain cursor-zoom-in hover:opacity-80 transition-opacity" onclick="openModal(this.src)">
+                    </div>
+                    <h4 class="text-xs font-extrabold text-slate-700 dark:text-slate-200 mb-0.5">Komponen PCA</h4>
+                    <p class="text-[10px] font-mono text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-1.5 py-0.5 rounded w-fit mb-1 border border-slate-100 dark:border-slate-700">Var(k) ≥ 95%</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">Jumlah dimensi optimal dari SVD.</p>
+                </div>
+            </div>
+
+            <div class="text-center pt-2">
+                <button id="reset-btn" class="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold underline decoration-dashed underline-offset-4 transition-colors">Analisis Ulang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 mt-auto transition-colors duration-300">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <span class="text-slate-500 dark:text-slate-500 text-xs">&copy; 2026 FaceMatch. All rights reserved.</span>
+            <div class="flex items-center justify-center gap-1.5 text-emerald-600 dark:text-emerald-500/70 text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-500/5 px-3 py-1.5 rounded-full border border-emerald-100 dark:border-emerald-500/10">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span>Privasi Terjamin: Foto Anda aman dan tidak disimpan di server.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-opacity duration-300 cursor-zoom-out" onclick="closeModal()">
+        <div class="relative w-full max-w-5xl h-full flex items-center justify-center">
+            <img id="lightbox-img" src="" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl bg-white dark:bg-slate-800 p-2 border border-slate-200 dark:border-slate-700" onclick="event.stopPropagation()">
+            <button class="absolute top-4 right-4 sm:top-8 sm:right-8 w-10 h-10 bg-white/20 hover:bg-white/40 text-white rounded-full flex items-center justify-center backdrop-blur-md transition-colors" onclick="closeModal()">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    // Theme Logic
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const sunIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />';
+    const moonIcon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />';
+
+    function updateThemeUI(isDark) {
+        if(isDark) {
+            document.documentElement.classList.add('dark');
+            themeIcon.innerHTML = sunIcon;
+        } else {
+            document.documentElement.classList.remove('dark');
+            themeIcon.innerHTML = moonIcon;
+        }
+    }
+
+    let isDarkMode = localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    updateThemeUI(isDarkMode);
+
+    themeToggleBtn.addEventListener('click', () => {
+        isDarkMode = !isDarkMode;
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        updateThemeUI(isDarkMode);
+    });
+
+    // Lightbox Logic
+    function openModal(src) {
+        if(!src || src === window.location.href) return;
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        document.getElementById('lightbox').classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    // Logic for FaceMatch
+    let fA=null, fB=null;
+
+    const pick = (f, s) => {
+        const err = document.getElementById('err-box');
+        err.classList.add('hide');
+        if(f.size > 5*1024*1024){ err.textContent="Maks 5MB"; err.classList.remove('hide'); return; }
+        const isA = s==='a';
+        if(isA) fA=f; else fB=f;
+        ['icon','txt','sub'].forEach(p => document.getElementById(`${p}-${s}`).classList.add('hide'));
+        const pv = document.getElementById(`prev-${s}`);
+        pv.src = URL.createObjectURL(f); pv.classList.remove('hide');
+        document.getElementById(`ov-${s}`).classList.remove('hide');
+        if(fA && fB) document.getElementById('go-btn').disabled = false;
+    };
+
+    ['a','b'].forEach(s => {
+        const dz = document.getElementById(`drop-${s}`), inp = document.getElementById(`in-${s}`);
+        dz.addEventListener('click', () => inp.click());
+        inp.addEventListener('change', e => e.target.files[0] && pick(e.target.files[0], s));
+        dz.addEventListener('dragover', e => e.preventDefault());
+        dz.addEventListener('drop', e => { e.preventDefault(); e.dataTransfer.files[0] && pick(e.dataTransfer.files[0], s); });
+    });
+
+    document.getElementById('go-btn').addEventListener('click', async () => {
+        if(!fA||!fB) return;
+        const btn=document.getElementById('go-btn'), txt=document.getElementById('go-txt'), sp=document.getElementById('go-spin'), err=document.getElementById('err-box');
+        btn.disabled=true; txt.textContent="Menghitung..."; sp.classList.remove('hide'); err.classList.add('hide');
+        const fd=new FormData(); fd.append('file1',fA); fd.append('file2',fB);
+        try {
+            const r = await fetch('/compare',{method:'POST',body:fd});
+            const d = await r.json();
+            if(!r.ok) throw new Error(d.error||"Gagal");
+            show(d);
+        } catch(e) { err.textContent=e.message; err.classList.remove('hide'); }
+        finally { btn.disabled=false; txt.textContent="Mulai Analisis"; sp.classList.add('hide'); }
+    });
+
+    function show(d) {
+        const res = document.getElementById('results');
+        res.classList.remove('hide');
+        setTimeout(() => res.scrollIntoView({behavior:'smooth',block:'start'}), 80);
+
+        const bn = document.getElementById('banner');
+        if(d.is_match) {
+            bn.className = "rounded-2xl px-6 py-5 text-center text-white bg-gradient-to-br from-emerald-500 to-teal-600";
+            document.getElementById('b-icon').innerHTML = '<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+            document.getElementById('b-title').textContent = "Identitas Cocok";
+            document.getElementById('b-desc').textContent = "Kedua foto dikonfirmasi sebagai individu yang sama.";
+        } else {
+            bn.className = "rounded-2xl px-6 py-5 text-center text-white bg-gradient-to-br from-rose-500 to-pink-600";
+            document.getElementById('b-icon').innerHTML = '<svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+            document.getElementById('b-title').textContent = "Tidak Identik";
+            document.getElementById('b-desc').textContent = "Kedua foto diprediksi merupakan individu yang berbeda.";
+        }
+        document.getElementById('m-sim').textContent = (d.similarity*100).toFixed(1)+"%";
+        document.getElementById('m-dist').textContent = d.distance.toFixed(3);
+        document.getElementById('m-conf').textContent = d.confidence;
+
+        document.getElementById('plot-crops').src = "data:image/png;base64," + d.plot_crops;
+        document.getElementById('plot-eigen').src = "data:image/png;base64," + d.plot_eigenface;
+        document.getElementById('plot-pca2d').src = "data:image/png;base64," + d.plot_pca2d;
+        document.getElementById('plot-hybrid').src = "data:image/png;base64," + d.plot_hybrid;
+        document.getElementById('plot-pca-var').src = "data:image/png;base64," + d.plot_pca_var;
+    }
+
+    document.getElementById('pca-toggle').addEventListener('click', () => {
+        const p = document.getElementById('pca-panel'), c = document.getElementById('pca-chevron');
+        p.classList.toggle('hidden'); c.classList.toggle('rotate-180');
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        fA=null; fB=null;
+        ['a','b'].forEach(s => {
+            document.getElementById(`in-${s}`).value='';
+            document.getElementById(`prev-${s}`).src=''; document.getElementById(`prev-${s}`).classList.add('hide');
+            document.getElementById(`ov-${s}`).classList.add('hide');
+            ['icon','txt','sub'].forEach(p => document.getElementById(`${p}-${s}`).classList.remove('hide'));
+        });
+        document.getElementById('go-btn').disabled=true;
+        document.getElementById('results').classList.add('hide');
+        document.getElementById('pca-panel').classList.add('hidden');
+        document.getElementById('pca-chevron').classList.remove('rotate-180');
+        window.scrollTo({top:0,behavior:'smooth'});
+    });
+    </script>
+</body>
+</html>
